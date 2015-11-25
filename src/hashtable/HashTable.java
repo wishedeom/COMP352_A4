@@ -49,6 +49,7 @@ public class HashTable
 	public String put(final String key, final String value)
 	{
 		// Change to table extension later
+		// Att: Should allow value replacement even if table is full
 		if (isFull())
 		{
 			throw new RuntimeException("Hash table is full.");
@@ -101,7 +102,7 @@ public class HashTable
 		String foundValue = null;
 		if (elementsSearched <= numElements && !positionIsEmpty(index))
 		{
-			foundValue = positions[index].get().getKey().toString();
+			foundValue = positions[index].get().getValue().toString();
 		}
 		
 		return foundValue;

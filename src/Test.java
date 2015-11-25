@@ -14,9 +14,7 @@ public class Test
 		h.displayContents();
 		h.put("C");
 		h.displayContents();
-		h.put("D");
-		h.displayContents();
-		h.put("A", "5");
-		h.displayContents();
+		
+		System.out.println("\n" + h.get("A"));
 	}
 }
