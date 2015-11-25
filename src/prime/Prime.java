@@ -1,3 +1,4 @@
+package prime;
 public final class Prime
 {
 	private static final int INITIAL_SIZE = 10;

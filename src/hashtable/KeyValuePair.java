@@ -1,3 +1,4 @@
+package hashtable;
 /**
  * Stores strings as keys and values for use in a hash map.
  * @author Michael Deom
