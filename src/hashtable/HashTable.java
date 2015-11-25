@@ -1,6 +1,5 @@
 package hashtable;
 
-
 public class HashTable
 {
 	private enum CollisionHandlingType
@@ -65,7 +64,7 @@ public class HashTable
 		}
 		while (!positionIsEmpty(index) && !positions[index].get().getKey().toString().equals(key));
 		
-		String oldValue = null;		
+		String oldValue = null;
 		if (positionIsEmpty(index))
 		{
 			positions[index] = new Position(kvp, index);

@@ -85,7 +85,7 @@ class Key
 		return key;
 	}
 	
-	public boolean equals(final Object o)
+	/*public boolean equals(final Object o)
 	{
 		boolean isEqual = false;
 		
@@ -95,5 +95,27 @@ class Key
 		}
 		
 		return isEqual;
+	}*/
+}
+
+class Position
+{
+	private KeyValuePair keyValuePair;
+	private int index;
+	
+	public Position(final KeyValuePair keyValuePair, final int index)
+	{
+		this.keyValuePair = keyValuePair;
+		this.index = index;
+	}
+	
+	public KeyValuePair get()
+	{
+		return keyValuePair;
+	}
+	
+	public int getIndex()
+	{
+		return index;
 	}
 }
