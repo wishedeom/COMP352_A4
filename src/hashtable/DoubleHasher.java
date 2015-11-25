@@ -1,5 +1,6 @@
 package hashtable;
 
+import hashtable.CollisionHandler.CollisionHandlingType;
 import prime.Prime;
 
 class DoubleHasher extends CollisionHandler
@@ -9,8 +10,6 @@ class DoubleHasher extends CollisionHandler
 	DoubleHasher(final HashTable implementingTable)
 	{
 		q = Prime.nextSmallestPrime(implementingTable.size());
-		System.out.println("size = " + implementingTable.size());
-		System.out.println("q = " + q);
 	}
 	
 	private int secondaryHash()
@@ -23,5 +22,10 @@ class DoubleHasher extends CollisionHandler
 		final int hashCode = getRawHash() + getCounter() * secondaryHash();
 		incrementCounter();
 		return hashCode;
+	}
+	
+	public CollisionHandlingType getType()
+	{
+		return CollisionHandlingType.DOUBLE;
 	}
 }

@@ -2,6 +2,12 @@ package hashtable;
 
 abstract class CollisionHandler
 {
+	enum CollisionHandlingType
+	{
+		DOUBLE,
+		QUADRATIC;
+	}
+	
 	private int rawHash;	// Unmodified hash code
 	private int counter;	// Counter
 	
@@ -10,7 +16,10 @@ abstract class CollisionHandler
 		reset(0);
 	}
 	
-	public void reset(final int rawHash)
+	abstract public int nextHash();
+	abstract public CollisionHandlingType getType();
+	
+	public final void reset(final int rawHash)
 	{
 		this.rawHash = rawHash;
 		counter = 0;
@@ -21,15 +30,13 @@ abstract class CollisionHandler
 		return rawHash;
 	}
 	
-	public int getCounter()
+	public final int getCounter()
 	{
 		return counter;
 	}
 	
-	public void incrementCounter()
+	public final void incrementCounter()
 	{
 		counter++;
 	}
-	
-	abstract public int nextHash();
 }

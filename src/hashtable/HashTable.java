@@ -1,13 +1,9 @@
 package hashtable;
 
+import hashtable.CollisionHandler.CollisionHandlingType;
+
 public class HashTable
 {
-	private enum CollisionHandlingType
-	{
-		DOUBLE,
-		QUADRATIC;
-	}
-	
 	private enum EmptyMarkerScheme
 	{
 		AVAILABLE,
@@ -16,7 +12,7 @@ public class HashTable
 	}
 	
 	private static final int DEFAULT_SIZE = 100;
-	private static final CollisionHandlingType DEFAULT_COLLISION_HANDLING_TYPE = CollisionHandlingType.DOUBLE;
+	private static final CollisionHandlingType DEFAULT_COLLISION_HANDLING_TYPE = CollisionHandler.CollisionHandlingType.DOUBLE;
 	private static final EmptyMarkerScheme DEFAULT_EMPTY_MARKER_SCHEME = EmptyMarkerScheme.AVAILABLE;
 	
 	private Position[] positions;
@@ -130,6 +126,12 @@ public class HashTable
 		}
 		
 		positions = newHashTable.positions;
+		numElements = newHashTable.numElements;
+	}
+	
+	public void resize(final int newSize)
+	{
+		resize(newSize, collisionHandler.getType(), emptyMarkerScheme);
 	}
 	
 	public void displayContents()
