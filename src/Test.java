@@ -4,12 +4,19 @@ public class Test
 {
 	public static void main(String[] args)
 	{
-		HashTable h = new HashTable(10);
+		HashTable h = new HashTable(3);
 		
-		for (int i = 1; i <= 10; i++)
-		{
-			h.put("A", "A");
-			h.displayContents();
-		}
+		h.put("A");
+		h.displayContents();
+		System.out.println("Replacing " + h.put("A", "B"));
+		h.displayContents();
+		h.put("B");
+		h.displayContents();
+		h.put("C");
+		h.displayContents();
+		h.put("D");
+		h.displayContents();
+		h.put("A", "5");
+		h.displayContents();
 	}
 }

@@ -5,27 +5,25 @@ package hashtable;
  *
  */
 
-public class KeyValuePair
-{
-	public static final int HASH_BASE = 33;	// Try 33, 37, 39, 41; products of few primes
-	
-	private String key;
+class KeyValuePair
+{	
+	private Key key;
 	private String value;
 	
-	public KeyValuePair(final String key, final String value)
+	public KeyValuePair(final String keyString, final String value)
 	{
-		if (key == null || value == null)
+		if (keyString == null || value == null)
 		{
 			throw new IllegalArgumentException ("Key and value must not be null.");
 		}
 		
-		this.key = key;
+		this.key = new Key(keyString);
 		this.value = value;
 	}
 	
 	public String getKey()
 	{
-		return key;
+		return key.toString();
 	}
 	
 	public String getValue()
@@ -45,6 +43,33 @@ public class KeyValuePair
 	
 	public int hashCode()
 	{
+		return key.hashCode();
+	}
+	
+	public String toString()
+	{
+		return "(" + key + ", " + value + ")";
+	}
+}
+
+class Key
+{
+	public static final int HASH_BASE = 33;	// Try 33, 37, 39, 41; products of few primes
+	
+	private String key;
+	
+	public Key(final String key)
+	{
+		if (key == null)
+		{
+			throw new IllegalArgumentException("Key cannot be null.");
+		}
+		
+		this.key = key;
+	}
+	
+	public int hashCode()
+	{
 		int code = 0;
 		
 		for (int i = key.length() - 1; i >= 0; i--)
@@ -55,21 +80,20 @@ public class KeyValuePair
 		return code;
 	}
 	
+	public String toString()
+	{
+		return key;
+	}
+	
 	public boolean equals(final Object o)
 	{
 		boolean isEqual = false;
 		
 		if (o.getClass() == this.getClass())
 		{
-			final KeyValuePair k = (KeyValuePair) o;
-			isEqual = k.key.equals(this.key) && k.value.equals(this.value);
+			isEqual = ((Key) o).toString().equals(key);
 		}
 		
 		return isEqual;
-	}
-	
-	public String toString()
-	{
-		return "(" + key + ", " + value + ")";
 	}
 }

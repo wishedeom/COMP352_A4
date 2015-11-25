@@ -2,7 +2,20 @@ package hashtable;
 
 
 public class HashTable
-{	
+{
+	private enum CollisionHandlingType
+	{
+		DOUBLE,
+		QUADRATIC;
+	}
+	
+	private enum EmptyMarkerScheme
+	{
+		AVAILABLE,
+		NEGATIVE,
+		REPLACE;
+	}
+	
 	private static final int DEFAULT_SIZE = 100;
 	private static final CollisionHandlingType DEFAULT_COLLISION_HANDLING_TYPE = CollisionHandlingType.DOUBLE;
 	private static final EmptyMarkerScheme DEFAULT_EMPTY_MARKER_SCHEME = EmptyMarkerScheme.AVAILABLE;
@@ -33,11 +46,12 @@ public class HashTable
 		setCollisionHandlingType(collisionHandlingType);
 	}
 	
-	public void put(final String key, final String value)
+	public String put(final String key, final String value)
 	{
+		// Change to table extension later
 		if (isFull())
 		{
-			throw new RuntimeException("Hash table is ass3ass.");
+			throw new RuntimeException("Hash table is full.");
 		}
 		
 		final KeyValuePair kvp = new KeyValuePair(key, value);
@@ -48,15 +62,50 @@ public class HashTable
 		{
 			index = compressor.compress(collisionHandler.nextHash());
 		}
-		while(!positionIsEmpty(index));
+		while (!positionIsEmpty(index) && !positions[index].get().getKey().toString().equals(key));
 		
-		positions[index] = new Position(kvp, index);
+		String oldValue = null;		
+		if (positionIsEmpty(index))
+		{
+			positions[index] = new Position(kvp, index);
+			numElements++;
+		}
+		else
+		{			
+			oldValue = positions[index].get().getValue();
+			positions[index].get().setValue(value);
+		}
+		
+		return oldValue;
 	}
 	
-	/*public void get(final String key)
+	public String put(final String keyValue)
 	{
-		final KeyValuePair
-	}*/
+		return put(keyValue, keyValue);
+	}
+	
+	public String get(final String key)
+	{
+		final Key target = new Key(key);
+		collisionHandler.reset(target.hashCode());
+		
+		int index;
+		int elementsSearched = 0;
+		do
+		{
+			index = compressor.compress(collisionHandler.nextHash());
+			elementsSearched++;
+		}
+		while (elementsSearched <= numElements && !positionIsEmpty(index) && !positions[index].get().getKey().toString().equals(key));
+		
+		String foundValue = null;
+		if (elementsSearched <= numElements && !positionIsEmpty(index))
+		{
+			foundValue = positions[index].get().getKey().toString();
+		}
+		
+		return foundValue;
+	}
 	
 	public void displayContents()
 	{

@@ -3,14 +3,14 @@ package hashtable;
 import java.util.Random;
 import prime.Prime;
 
-public class Compressor
+class Compressor
 {
 	private int N;	// Size of associated HashTable
 	private int p;	// Prime number larger than N
 	private int a;	// Pre-modulus multiplier
 	private int b;	// Pre-modulus adder
 	
-	public Compressor(final HashTable hashTable)
+	Compressor(final HashTable hashTable)
 	{
 		N = hashTable.size();
 		p = Prime.nextLargestPrime(N);
@@ -20,7 +20,7 @@ public class Compressor
 		b = rand.nextInt(p);			// Random integer in [0, p-1]
 	}
 	
-	public Compressor(final int N, final int a, final int b)
+	Compressor(final int N, final int a, final int b)
 	{
 		if (N <= 0)
 		{
