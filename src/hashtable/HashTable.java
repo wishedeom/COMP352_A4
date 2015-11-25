@@ -107,6 +107,31 @@ public class HashTable
 		return foundValue;
 	}
 	
+	public void resize(final int newSize, final CollisionHandlingType newCollisionHandlingType, final EmptyMarkerScheme newEmptyMarkerScheme)
+	{
+		if (newSize < numElements)
+		{
+			throw new IllegalArgumentException("New size not large enough to hold all elements.");
+		}
+		
+		numElements = 0;
+		setCollisionHandlingType(newCollisionHandlingType);
+		setEmptyMarkerScheme(newEmptyMarkerScheme);
+		
+		HashTable newHashTable = new HashTable(newSize, newCollisionHandlingType, newEmptyMarkerScheme);
+		for (Position p : positions)
+		{
+			if (p != null)
+			{
+				final String key = p.get().getKey();
+				final String value = p.get().getValue();
+				newHashTable.put(key, value);
+			}
+		}
+		
+		positions = newHashTable.positions;
+	}
+	
 	public void displayContents()
 	{
 		for (Position p : positions)
@@ -143,6 +168,38 @@ public class HashTable
 		}
 	}
 	
+	public boolean setEmptyMarkerScheme(final EmptyMarkerScheme emptyMarkerScheme)
+	{
+		final boolean changedScheme = this.emptyMarkerScheme != emptyMarkerScheme;
+		
+		if (changedScheme)
+		{
+			for (int i = 0; i < positions.length; i++)
+			{
+				if (positionIsFormerlyOccupied(i))
+				{
+					Position replacementPosition;
+					switch (emptyMarkerScheme)
+					{
+						case AVAILABLE:
+							replacementPosition = new AvailablePosition(i);
+							break;
+						case NEGATIVE:
+							replacementPosition = new Position(new KeyValuePair("-", ""), i);
+							break;
+						case REPLACE:
+							// Do thing
+							break;
+						default:
+							break;
+					}
+				}
+			}
+		}
+		
+		return changedScheme;
+	}
+	
 	public boolean isEmpty()
 	{
 		return numElements == 0;
@@ -155,9 +212,14 @@ public class HashTable
 	
 	public boolean positionIsEmpty(final int index)
 	{		
-		return (positions[index] == null)
-			|| (emptyMarkerScheme == EmptyMarkerScheme.AVAILABLE && positions[index] instanceof AvailablePosition)
-			|| (emptyMarkerScheme == EmptyMarkerScheme.NEGATIVE && positions[index].get() != null && positions[index].get().getKey().charAt(0) == '-');
+		return (positions[index] == null) || positionIsFormerlyOccupied(index);
+	}
+	
+	public boolean positionIsFormerlyOccupied(final int index)
+	{		
+		return (positions[index] != null)
+			&& ((emptyMarkerScheme == EmptyMarkerScheme.AVAILABLE && positions[index].isAvailablePosition())
+			|| (emptyMarkerScheme == EmptyMarkerScheme.NEGATIVE && positions[index].get() != null && positions[index].get().getKey().charAt(0) == '-'));
 	}
 	
 	public int size()
