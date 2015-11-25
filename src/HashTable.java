@@ -182,7 +182,7 @@ public class HashTable
 	{
 		if (isFull())
 		{
-			throw new RuntimeException("Hash table is ass2ass.");
+			throw new RuntimeException("Hash table is ass3ass.");
 		}
 		
 		final KeyValuePair kvp = new KeyValuePair(key, value);
