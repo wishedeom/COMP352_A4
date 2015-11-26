@@ -27,8 +27,8 @@ class QuadraticProbe extends CollisionHandler
 		return hashCode;
 	}
 
-	public CollisionHandlingType getType()
+	public CollisionHandlingScheme getType()
 	{
-		return CollisionHandlingType.QUADRATIC;
+		return CollisionHandlingScheme.QUADRATIC;
 	}
 }

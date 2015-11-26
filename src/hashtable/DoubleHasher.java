@@ -23,8 +23,8 @@ class DoubleHasher extends CollisionHandler
 		return hashCode;
 	}
 	
-	public CollisionHandlingType getType()
+	public CollisionHandlingScheme getType()
 	{
-		return CollisionHandlingType.DOUBLE;
+		return CollisionHandlingScheme.DOUBLE;
 	}
 }

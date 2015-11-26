@@ -2,7 +2,7 @@ package hashtable;
 
 abstract class CollisionHandler
 {
-	enum CollisionHandlingType
+	enum CollisionHandlingScheme
 	{
 		DOUBLE,
 		QUADRATIC;
@@ -17,7 +17,7 @@ abstract class CollisionHandler
 	}
 	
 	abstract public int nextHash();
-	abstract public CollisionHandlingType getType();
+	abstract public CollisionHandlingScheme getType();
 	
 	public final void reset(final int rawHash)
 	{

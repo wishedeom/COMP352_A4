@@ -1,9 +1,35 @@
 package hashtable;
 
-import hashtable.CollisionHandler.CollisionHandlingType;
+import hashtable.CollisionHandler.CollisionHandlingScheme;
 
+/**
+ * The HashTable class represents a hash table for storing String values with String keys. The default initial size of the table is 100 entries, and the table will automatically resize when
+ * the load factor (ratio of stored elements to table size) exceeds 0.75. By default, each resizing will double the table size, but any factor or constant term can be selected. The table can
+ * also be resized manually at any time. In any resizing, the stored entries will be re-hashed.
+ * 
+ * Entries can be added to the table, searched for by key, or removed by key. When adding an entry, if no entry with that key already exists in the table, a new entry is added. If an entry
+ * with the same key already exists, the old value is replaced with the new value.
+ * 
+ * There are two methods for resolving hash collisions: By default, collisions are resolved by double hashing - multiples of a secondary hash function are added to the key's raw hash until an empty
+ * array index is found. The alternative is quadratic hashing, where the images of a quadratic integer function are added to the raw hash until a suitable location is found.
+ * 
+ * To accelerate searching, removed entries are dealt with in one of three ways: By default, a special object (of type AvailablePosition) is placed in place of each entry. Alternatively, any key
+ * string which begins with the symbol '-' can be considered a removed position. Finally, removed entries can simply be replaced with other entries whose keys would have had them out into the same
+ * array element.
+ * 
+ * @author Michael Deom, Tarik Abbou-Saddik
+ *
+ */
 public class HashTable
 {
+	/**
+	 * Enumerates the three possible schemes for dealing with removed elements.
+	 * 
+	 * AVAILABLE: Removed elements are replaced with AvailablePosition objects.
+	 * NEGATIVE: Removed elements have a '-' character placed at the head of their keys.
+	 * REPLACE: Removed elements are replaced with other elements that would have been placed in the same spot.
+	 *
+	 */
 	private enum EmptyMarkerScheme
 	{
 		AVAILABLE	('A'),
@@ -12,11 +38,20 @@ public class HashTable
 		
 		private char representation;
 		
+		/**
+		 * Constructor. Associates each value with a character representation.
+		 * @param representation The character representation of the enum value.
+		 */
 		private EmptyMarkerScheme(final char representation)
 		{
 			this.representation = representation;
 		}
 		
+		/**
+		 * Converts from a character representation to an empty marker scheme.
+		 * @param representation The character representation of the empty marker scheme.
+		 * @return The empty marker scheme enumerated value.
+		 */
 		private static EmptyMarkerScheme fromChar(final char representation)
 		{
 			EmptyMarkerScheme emptyMarkerScheme = null;
@@ -29,32 +64,37 @@ public class HashTable
 				}
 			}
 			
+			if (emptyMarkerScheme == null)
+			{
+				throw new IllegalArgumentException("This character does not have an associated empty marker scheme.");
+			}
+			
 			return emptyMarkerScheme;
 		}
 	}
 	
-	private static final int DEFAULT_SIZE = 100;
-	private static final CollisionHandlingType DEFAULT_COLLISION_HANDLING_TYPE = CollisionHandler.CollisionHandlingType.DOUBLE;
-	private static final EmptyMarkerScheme DEFAULT_EMPTY_MARKER_SCHEME = EmptyMarkerScheme.AVAILABLE;
+	private static final int DEFAULT_INITIAL_SIZE = 100;																// Default initial size of hash table
+	private static final CollisionHandlingScheme DEFAULT_COLLISION_HANDLING_SCHEME = CollisionHandlingScheme.DOUBLE;	// Default initial collision handling scheme
+	private static final EmptyMarkerScheme DEFAULT_EMPTY_MARKER_SCHEME = EmptyMarkerScheme.AVAILABLE;					// Default initial empty marker scheme
 	
-	private Position[] positions;
-	private Compressor compressor;
-	private CollisionHandler collisionHandler;
-	private EmptyMarkerScheme emptyMarkerScheme;
-	private int numElements;
-	private double loadFactor;
+	private Position[] positions;					// Holds the positions which point to the key-value pairs
+	private Compressor compressor;					// Maps hash codes to array indices
+	private CollisionHandler collisionHandler;		// Iterates through array indices to find an empty spot, when hash collisions occur
+	private EmptyMarkerScheme emptyMarkerScheme;	// The current empty marker scheme being used
+	private int numElements;						// The number of elements held by the hash table; starts at 0
+	private double loadFactor;						// The ratio of held elements to array size
 	
 	public HashTable()
 	{
-		this(DEFAULT_SIZE, DEFAULT_COLLISION_HANDLING_TYPE, DEFAULT_EMPTY_MARKER_SCHEME);
+		this(DEFAULT_INITIAL_SIZE, DEFAULT_COLLISION_HANDLING_SCHEME, DEFAULT_EMPTY_MARKER_SCHEME);
 	}
 	
 	public HashTable(final int initialSize)
 	{
-		this(initialSize, DEFAULT_COLLISION_HANDLING_TYPE, DEFAULT_EMPTY_MARKER_SCHEME);
+		this(initialSize, DEFAULT_COLLISION_HANDLING_SCHEME, DEFAULT_EMPTY_MARKER_SCHEME);
 	}
 	
-	public HashTable(final int initialSize, final CollisionHandlingType collisionHandlingType, final EmptyMarkerScheme emptyMarkerScheme)
+	public HashTable(final int initialSize, final CollisionHandlingScheme collisionHandlingType, final EmptyMarkerScheme emptyMarkerScheme)
 	{
 		this.positions = new Position[initialSize];
 		this.compressor = new Compressor(this);
@@ -66,14 +106,7 @@ public class HashTable
 	}
 	
 	public String put(final String key, final String value)
-	{
-		// Change to table extension later
-		// Att: Should allow value replacement even if table is full
-		if (isFull())
-		{
-			throw new RuntimeException("Hash table is full.");
-		}
-		
+	{		
 		final KeyValuePair kvp = new KeyValuePair(key, value);
 		collisionHandler.reset(kvp.hashCode());
 		
@@ -189,7 +222,7 @@ public class HashTable
 		while (!positionIsEmpty(nextIndex));
 	}
 	
-	public void resize(final int newSize, final CollisionHandlingType newCollisionHandlingType, final EmptyMarkerScheme newEmptyMarkerScheme)
+	public void resize(final int newSize, final CollisionHandlingScheme newCollisionHandlingType, final EmptyMarkerScheme newEmptyMarkerScheme)
 	{
 		if (newSize < numElements)
 		{
@@ -241,7 +274,7 @@ public class HashTable
 		System.out.println();
 	}
 	
-	public void setCollisionHandlingType(final CollisionHandlingType collisionHandlingType)
+	public void setCollisionHandlingType(final CollisionHandlingScheme collisionHandlingType)
 	{
 		if (!isEmpty())
 		{
