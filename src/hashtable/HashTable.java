@@ -22,6 +22,7 @@ import hashtable.CollisionHandler.CollisionHandlingScheme;
  */
 public class HashTable
 {
+	
 	/**
 	 * Enumerates the three possible schemes for dealing with removed elements.
 	 * 
@@ -36,7 +37,8 @@ public class HashTable
 		NEGATIVE	('N'),
 		REPLACE		('R');
 		
-		private char representation;
+		private char representation;	// Character representation of the enum value
+		
 		
 		/**
 		 * Constructor. Associates each value with a character representation.
@@ -47,16 +49,17 @@ public class HashTable
 			this.representation = representation;
 		}
 		
+		
 		/**
 		 * Converts from a character representation to an empty marker scheme.
-		 * @param representation The character representation of the empty marker scheme.
+		 * @param representation The character representation of the empty marker scheme. Must be 'A', 'N', or 'R'.
 		 * @return The empty marker scheme enumerated value.
 		 */
 		private static EmptyMarkerScheme fromChar(final char representation)
 		{
 			EmptyMarkerScheme emptyMarkerScheme = null;
 			
-			for (EmptyMarkerScheme e : EmptyMarkerScheme.values())
+			for (EmptyMarkerScheme e : EmptyMarkerScheme.values())	// Iterate through the enum values until a matching one is found.
 			{
 				if (representation == e.representation)
 				{
@@ -64,7 +67,7 @@ public class HashTable
 				}
 			}
 			
-			if (emptyMarkerScheme == null)
+			if (emptyMarkerScheme == null)	// Throw an exception if an unsupported character is passed.
 			{
 				throw new IllegalArgumentException("This character does not have an associated empty marker scheme.");
 			}
@@ -84,32 +87,63 @@ public class HashTable
 	private int numElements;						// The number of elements held by the hash table; starts at 0
 	private double loadFactor;						// The ratio of held elements to array size
 	
+	
+	/**
+	 * No-argument constructor. Constructs an empty hash table with with initial size 100, double hashing, and "available" empty markers.
+	 */
 	public HashTable()
 	{
 		this(DEFAULT_INITIAL_SIZE, DEFAULT_COLLISION_HANDLING_SCHEME, DEFAULT_EMPTY_MARKER_SCHEME);
 	}
 	
+	
+	/**
+	 * Constructor. Constructs a hash table with the given initial size.
+	 * @param initialSize The hash table's initial size, a non-negative integer.
+	 */
 	public HashTable(final int initialSize)
-	{
+	{		
 		this(initialSize, DEFAULT_COLLISION_HANDLING_SCHEME, DEFAULT_EMPTY_MARKER_SCHEME);
 	}
 	
-	public HashTable(final int initialSize, final CollisionHandlingScheme collisionHandlingType, final EmptyMarkerScheme emptyMarkerScheme)
+	
+	/**
+	 * Constructor. Constructs an empty hash table with the given initial size, collision handling scheme, and empty marker scheme.
+	 * @param initialSize The hash table's initial size, a non-negative integer.
+	 * @param collisionHandlingScheme The hash table's initial collision handling scheme.
+	 * @param emptyMarkerScheme The hash table's initial empty marker scheme.
+	 */
+	public HashTable(final int initialSize, final CollisionHandlingScheme collisionHandlingScheme, final EmptyMarkerScheme emptyMarkerScheme)
 	{
+		// Check for illegal initial size
+		if (initialSize < 0)
+		{
+			throw new IllegalArgumentException("Initial size must be a non-negative integer.");
+		}
+		
 		this.positions = new Position[initialSize];
 		this.compressor = new Compressor(this);
 		this.emptyMarkerScheme = emptyMarkerScheme;
 		this.numElements = 0;
 		
-		setCollisionHandlingType(collisionHandlingType);
-		updateLoadFactor();
+		setCollisionHandlingType(collisionHandlingScheme);
+		updateLoadFactor();		// Compute initial load factor 
 	}
 	
+	
+	/**
+	 * Adds a new entry to the hash table, with a given string key and string value. If an entry with the same key already exists, the old value is replaced with the new value, and the old value
+	 * is returned.
+	 * @param key The key of the entry to add.
+	 * @param value The value of the entry to add.
+	 * @return Null if a new entry was added, the old value if it was replaced.
+	 */
 	public String put(final String key, final String value)
 	{		
-		final KeyValuePair kvp = new KeyValuePair(key, value);
-		collisionHandler.reset(kvp.hashCode());
+		final KeyValuePair kvp = new KeyValuePair(key, value);	// Create a new key-value pair with the given strings
+		collisionHandler.reset(kvp.hashCode());					// Prepare the collisionHandler with the new pair; reset the counter
 		
+		// Iterate through the indices until an empty index or one holding an entry with the desired key is found
 		int index;
 		do
 		{
@@ -117,31 +151,44 @@ public class HashTable
 		}
 		while (!positionIsEmpty(index) && !positions[index].get().getKey().toString().equals(key));
 		
-		String oldValue = null;
-		if (positionIsEmpty(index))
+		String oldValue = null;			// If no old value is found, will return null
+		if (positionIsEmpty(index))		// If the position is empty, a new entry is created
 		{
 			positions[index] = new Position(kvp, index);
-			addElement();
+			addElement();				// Increment the number of elements; update load factor.
 		}
 		else
 		{			
-			oldValue = positions[index].get().getValue();
-			positions[index].get().setValue(value);
+			oldValue = positions[index].get().getValue();	// If the position is not empty, it must have the same key as the put entry
+			positions[index].get().setValue(value);			// So, replace and return the old value 
 		}
 		
 		return oldValue;
 	}
 	
+	
+	/**
+	 * Convenience method. Puts an entry with the same key and value.
+	 * @param keyValue The key and the value of the entry to add.
+	 * @return Null if a new entry was added, the old value if it was replaced.
+	 */
 	public String put(final String keyValue)
 	{
 		return put(keyValue, keyValue);
 	}
 	
+	
+	/**
+	 * Searches the table for an entry with the given key and returns the associated value. Returns null if the entry is not found.
+	 * @param key The key of the entry to search for.
+	 * @return The associated value if it is found, null otherwise
+	 */
 	public String get(final String key)
 	{
-		final Key target = new Key(key);
-		collisionHandler.reset(target.hashCode());
+		final Key target = new Key(key);			// Create a new key-value pair with the given strings
+		collisionHandler.reset(target.hashCode());	// Prepare the collision handler
 		
+		// Iterate until the entry is found, an empty location is found, or all elements have been searched.
 		int index;
 		int elementsSearched = 0;
 		do
@@ -151,15 +198,21 @@ public class HashTable
 		}
 		while (elementsSearched <= numElements && !positionIsEmpty(index) && !positions[index].get().getKey().toString().equals(key));
 		
-		String foundValue = null;
+		String foundValue = null;											// If the entry is not found, return null
 		if (elementsSearched <= numElements && !positionIsEmpty(index))
 		{
-			foundValue = positions[index].get().getValue().toString();
+			foundValue = positions[index].get().getValue().toString();		// If the entry is found, return the value
 		}
 		
 		return foundValue;
 	}
 	
+	
+	/**
+	 * 
+	 * @param key
+	 * @return
+	 */
 	public String remove(final String key)
 	{
 		final Key target = new Key(key);
