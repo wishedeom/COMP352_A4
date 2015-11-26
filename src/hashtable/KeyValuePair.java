@@ -1,4 +1,5 @@
 package hashtable;
+
 /**
  * Stores strings as keys and values for use in a hash map.
  * @author Michael Deom
@@ -10,15 +11,10 @@ class KeyValuePair
 	private Key key;
 	private String value;
 	
-	public KeyValuePair(final String keyString, final String value)
+	public KeyValuePair(final String key, final String value)
 	{
-		if (keyString == null || value == null)
-		{
-			throw new IllegalArgumentException ("Key and value must not be null.");
-		}
-		
-		this.key = new Key(keyString);
-		this.value = value;
+		setKey(key);
+		setValue(value);
 	}
 	
 	public String getKey()
@@ -29,6 +25,16 @@ class KeyValuePair
 	public String getValue()
 	{
 		return value;
+	}
+	
+	public void setKey(final String key)
+	{
+		if (key == null)
+		{
+			throw new IllegalArgumentException ("Key must not be null.");
+		}
+		
+		this.key = new Key(key);
 	}
 	
 	public void setValue(final String value)
@@ -84,16 +90,4 @@ class Key
 	{
 		return key;
 	}
-	
-	/*public boolean equals(final Object o)
-	{
-		boolean isEqual = false;
-		
-		if (o.getClass() == this.getClass())
-		{
-			isEqual = ((Key) o).toString().equals(key);
-		}
-		
-		return isEqual;
-	}*/
 }

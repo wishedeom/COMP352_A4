@@ -20,6 +20,7 @@ public class HashTable
 	private CollisionHandler collisionHandler;
 	private EmptyMarkerScheme emptyMarkerScheme;
 	private int numElements;
+	private double loadFactor;
 	
 	public HashTable()
 	{
@@ -39,6 +40,7 @@ public class HashTable
 		this.numElements = 0;
 		
 		setCollisionHandlingType(collisionHandlingType);
+		updateLoadFactor();
 	}
 	
 	public String put(final String key, final String value)
@@ -64,7 +66,7 @@ public class HashTable
 		if (positionIsEmpty(index))
 		{
 			positions[index] = new Position(kvp, index);
-			numElements++;
+			addElement();
 		}
 		else
 		{			
@@ -103,6 +105,53 @@ public class HashTable
 		return foundValue;
 	}
 	
+	public String remove(final String key)
+	{
+		final Key target = new Key(key);
+		collisionHandler.reset(target.hashCode());
+		
+		int index;
+		int elementsSearched = 0;
+		do
+		{
+			index = compressor.compress(collisionHandler.nextHash());
+			elementsSearched++;
+		}
+		while (elementsSearched <= numElements && !positionIsEmpty(index) && !positions[index].get().getKey().toString().equals(key));
+		
+		String foundValue = null;
+		if (elementsSearched <= numElements && !positionIsEmpty(index))
+		{
+			foundValue = positions[index].get().getValue().toString();
+			makePositionAvailable(index);
+			addElements(-1);
+		}
+		
+		return foundValue;
+	}
+	
+	private void makePositionAvailable(final int index)
+	{
+		switch (emptyMarkerScheme)
+		{
+			case AVAILABLE:
+				positions[index] = new AvailablePosition(index);
+				break;
+			case NEGATIVE:
+				final KeyValuePair original = positions[index].get();
+				final KeyValuePair negated = new KeyValuePair("-" + original.getKey().toString(), original.getValue().toString());
+				positions[index] = new Position(negated, index);
+				break;
+			case REPLACE:
+				// Thing
+				break;
+			default:
+				break;
+		}
+	}
+	
+	/*private void rollBack*/
+	
 	public void resize(final int newSize, final CollisionHandlingType newCollisionHandlingType, final EmptyMarkerScheme newEmptyMarkerScheme)
 	{
 		if (newSize < numElements)
@@ -126,6 +175,7 @@ public class HashTable
 		}
 		
 		positions = newHashTable.positions;
+		compressor = newHashTable.compressor;
 		numElements = newHashTable.numElements;
 	}
 	
@@ -134,13 +184,17 @@ public class HashTable
 		resize(newSize, collisionHandler.getType(), emptyMarkerScheme);
 	}
 	
-	public void displayContents()
+	public void display()
 	{
 		for (Position p : positions)
 		{
 			if (p == null)
 			{
 				System.out.println("Never filled");
+			}
+			else if (p.isAvailablePosition())
+			{
+				System.out.println("Formerly occupied");
 			}
 			else
 			{
@@ -200,6 +254,23 @@ public class HashTable
 		}
 		
 		return changedScheme;
+	}
+	
+	private void addElement()
+	{
+		addElements(1);
+	}
+	
+	private void addElements(final int change)
+	{
+		numElements += change;
+		updateLoadFactor();
+	}
+	
+	private double updateLoadFactor()
+	{
+		return loadFactor = ((double) numElements) / size();
+		
 	}
 	
 	public boolean isEmpty()
