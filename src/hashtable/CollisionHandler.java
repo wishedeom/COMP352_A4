@@ -39,4 +39,21 @@ abstract class CollisionHandler
 	{
 		counter++;
 	}
+	
+	public int nextHash(final int repetitions)
+	{
+		if (repetitions < 1)
+		{
+			throw new IllegalArgumentException("Number of repetitions must be a positive integer.");
+		}
+		
+		int finalHash = Integer.MIN_VALUE;
+		
+		for (int i = 1; i <= repetitions; i++)
+		{
+			finalHash = nextHash();
+		}
+		
+		return finalHash;
+	}
 }

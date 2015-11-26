@@ -1,6 +1,5 @@
 package hashtable;
 
-import hashtable.CollisionHandler.CollisionHandlingType;
 import prime.Prime;
 
 class DoubleHasher extends CollisionHandler

@@ -6,9 +6,31 @@ public class HashTable
 {
 	private enum EmptyMarkerScheme
 	{
-		AVAILABLE,
-		NEGATIVE,
-		REPLACE;
+		AVAILABLE	('A'),
+		NEGATIVE	('N'),
+		REPLACE		('R');
+		
+		private char representation;
+		
+		private EmptyMarkerScheme(final char representation)
+		{
+			this.representation = representation;
+		}
+		
+		private static EmptyMarkerScheme fromChar(final char representation)
+		{
+			EmptyMarkerScheme emptyMarkerScheme = null;
+			
+			for (EmptyMarkerScheme e : EmptyMarkerScheme.values())
+			{
+				if (representation == e.representation)
+				{
+					emptyMarkerScheme = e;
+				}
+			}
+			
+			return emptyMarkerScheme;
+		}
 	}
 	
 	private static final int DEFAULT_SIZE = 100;
@@ -143,14 +165,29 @@ public class HashTable
 				positions[index] = new Position(negated, index);
 				break;
 			case REPLACE:
-				// Thing
+				rollBack(index);
 				break;
 			default:
 				break;
 		}
 	}
 	
-	/*private void rollBack*/
+	private void rollBack(final int index)
+	{
+		if (isEmpty())
+		{
+			throw new RuntimeException("Cannot roll back: Hash table is empty.");
+		}
+		
+		collisionHandler.reset(positions[index].get().hashCode());
+		positions[index] = null;
+		int nextIndex;
+		do
+		{
+			nextIndex = compressor.compress(collisionHandler.nextHash());
+		}
+		while (!positionIsEmpty(nextIndex));
+	}
 	
 	public void resize(final int newSize, final CollisionHandlingType newCollisionHandlingType, final EmptyMarkerScheme newEmptyMarkerScheme)
 	{
@@ -224,6 +261,11 @@ public class HashTable
 		}
 	}
 	
+	public boolean setEmptyMarkerScheme(final char emptyMarkerScheme)
+	{
+		return setEmptyMarkerScheme(EmptyMarkerScheme.fromChar(emptyMarkerScheme));
+	}
+	
 	public boolean setEmptyMarkerScheme(final EmptyMarkerScheme emptyMarkerScheme)
 	{
 		final boolean changedScheme = this.emptyMarkerScheme != emptyMarkerScheme;
@@ -234,7 +276,7 @@ public class HashTable
 			{
 				if (positionIsFormerlyOccupied(i))
 				{
-					Position replacementPosition;
+					Position replacementPosition = null;
 					switch (emptyMarkerScheme)
 					{
 						case AVAILABLE:
@@ -249,6 +291,7 @@ public class HashTable
 						default:
 							break;
 					}
+					positions[i] = replacementPosition;
 				}
 			}
 		}
