@@ -78,6 +78,7 @@ public class HashTable
 	}
 	
 	private static final int DEFAULT_INITIAL_SIZE = 100;																// Default initial size of hash table
+	private static final double DEFAULT_REHASH_THRESHOLD = 0.75;														// Default initial size of hash table
 	private static final CollisionHandlingScheme DEFAULT_COLLISION_HANDLING_SCHEME = CollisionHandlingScheme.DOUBLE;	// Default initial collision handling scheme
 	private static final EmptyMarkerScheme DEFAULT_EMPTY_MARKER_SCHEME = EmptyMarkerScheme.AVAILABLE;					// Default initial empty marker scheme
 	
@@ -87,14 +88,14 @@ public class HashTable
 	private EmptyMarkerScheme emptyMarkerScheme;	// The current empty marker scheme being used
 	private int numElements;						// The number of elements held by the hash table; starts at 0
 	private double loadFactor;						// The ratio of held elements to array size
-	
+	private double rehashThreshold;					// Maximum load factor before rehashing; between 0 and 1 inclusive
 	
 	/**
 	 * No-argument constructor. Constructs an empty hash table with with initial size 100, double hashing, and "available" empty markers.
 	 */
 	public HashTable()
 	{
-		this(DEFAULT_INITIAL_SIZE, DEFAULT_COLLISION_HANDLING_SCHEME, DEFAULT_EMPTY_MARKER_SCHEME);
+		this(DEFAULT_INITIAL_SIZE);
 	}
 	
 	
@@ -104,17 +105,18 @@ public class HashTable
 	 */
 	public HashTable(final int initialSize)
 	{		
-		this(initialSize, DEFAULT_COLLISION_HANDLING_SCHEME, DEFAULT_EMPTY_MARKER_SCHEME);
+		this(initialSize, DEFAULT_REHASH_THRESHOLD, DEFAULT_COLLISION_HANDLING_SCHEME, DEFAULT_EMPTY_MARKER_SCHEME);
 	}
 	
 	
 	/**
-	 * Constructor. Constructs an empty hash table with the given initial size, collision handling scheme, and empty marker scheme.
+	 * Constructor. Constructs an empty hash table with the given initial size, rehash threshold, collision handling scheme, and empty marker scheme.
 	 * @param initialSize The hash table's initial size, a non-negative integer.
+	 * @param initialRehashThreshold The hash table's initial rehash threshold, a floating-point number between 0 and 1.
 	 * @param collisionHandlingScheme The hash table's initial collision handling scheme.
 	 * @param emptyMarkerScheme The hash table's initial empty marker scheme.
 	 */
-	public HashTable(final int initialSize, final CollisionHandlingScheme collisionHandlingScheme, final EmptyMarkerScheme emptyMarkerScheme)
+	public HashTable(final int initialSize, final double initialRehashThreshold, final CollisionHandlingScheme collisionHandlingScheme, final EmptyMarkerScheme emptyMarkerScheme)
 	{
 		// Check for illegal initial size
 		if (initialSize < 0)
@@ -127,6 +129,7 @@ public class HashTable
 		this.compressor = new Compressor(this);
 		this.emptyMarkerScheme = emptyMarkerScheme;
 		this.numElements = 0;
+		this.rehashThreshold = initialRehashThreshold;
 		
 		setCollisionHandlingType(collisionHandlingScheme);
 		updateLoadFactor();		// Compute initial load factor 
@@ -313,7 +316,9 @@ public class HashTable
 		setEmptyMarkerScheme(newEmptyMarkerScheme);
 		
 		final int nextPrimeSize = Prime.nextLargestPrime(newSize);	//Size should always be prime, so round up to the next prime
-		HashTable newHashTable = new HashTable(nextPrimeSize, newCollisionHandlingScheme, newEmptyMarkerScheme);	// Make a new hash table with the desired size; properties will be copied over
+
+		// Make a new hash table with the desired size; properties will be copied over
+		HashTable newHashTable = new HashTable(nextPrimeSize, rehashThreshold, newCollisionHandlingScheme, newEmptyMarkerScheme);
 		
 		// Put each old entry into the new table; the proper hashing and compression algorithms will be automatically used
 		for (Position p : positions)
@@ -330,6 +335,21 @@ public class HashTable
 		positions = newHashTable.positions;
 		compressor = newHashTable.compressor;
 		numElements = newHashTable.numElements;
+	}
+	
+	/**
+	 * Changes the table's rehash threshold. When the load factor equals or exceeds this number, the table will be resized. 
+	 * @param rehashThreshold The table's new rehash threshold.
+	 */
+	public void setRehashThreshold(final double rehashThreshold)
+	{
+		if (!(0.0 <= rehashThreshold && rehashThreshold <= 1.0))
+		{
+			throw new IllegalArgumentException("Rehash threshold must be between 0 and 1, inclusive.");
+		}
+		
+		this.rehashThreshold = rehashThreshold;
+		updateLoadFactor();
 	}
 	
 	
