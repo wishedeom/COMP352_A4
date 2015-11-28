@@ -446,7 +446,7 @@ public class HashTable
 	
 	/**
 	 * Increments or decrements the number of elements counter by a specified amount. Updates the load factor afterwards.
-	 * @param change The number to add to the 
+	 * @param change The number to add to the number of elements counter.
 	 */
 	private void addElements(final int change)
 	{
@@ -454,27 +454,52 @@ public class HashTable
 		updateLoadFactor();
 	}
 	
+	
+	/**
+	 * Re-computes the load factor (ratio of number of elements to total size). Checks that this is not more than the total laod factor afterwards. 
+	 * @return The updated load factor.
+	 */
 	private double updateLoadFactor()
 	{
-		return loadFactor = ((double) numElements) / size();
+		loadFactor = ((double) numElements) / size();
+		// TO DO: CHeck load factor after
+		return loadFactor;
 		
 	}
 	
+	
+	/**
+	 * Checks if the hash table is empty.
+	 * @return True if and only if the table has no elements stored.
+	 */
 	public boolean isEmpty()
 	{
 		return numElements == 0;
 	}
 	
+	// TO DO: REMOVE AND REPLACE WITH "checkLoadFactor"
 	public boolean isFull()
 	{
 		return numElements >= size();
 	}
 	
+	
+	/**
+	 * Checks if a position at a given index is empty, whether or not it has ever been occupied.
+	 * @param index The index of the position to check.
+	 * @return True if and only if the position is not filled with an entry.
+	 */
 	public boolean positionIsEmpty(final int index)
 	{		
 		return (positions[index] == null) || positionIsFormerlyOccupied(index);
 	}
 	
+	
+	/**
+	 * Checks if a position at a given index is but has been formerly occupied.
+	 * @param index The index of the position to check.
+	 * @return True if and only if the position is available but has been previously occupied.
+	 */
 	public boolean positionIsFormerlyOccupied(final int index)
 	{		
 		return (positions[index] != null)
@@ -482,6 +507,11 @@ public class HashTable
 			|| (emptyMarkerScheme == EmptyMarkerScheme.NEGATIVE && positions[index].get() != null && positions[index].get().getKey().charAt(0) == '-'));
 	}
 	
+	
+	/**
+	 * Returns the total size of the hash table.
+	 * @return The size of the hash table.
+	 */
 	public int size()
 	{
 		return positions.length;
