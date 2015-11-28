@@ -1,5 +1,6 @@
 package hashtable;
 
+import prime.Prime;
 import hashtable.CollisionHandler.CollisionHandlingScheme;
 
 /**
@@ -121,7 +122,8 @@ public class HashTable
 			throw new IllegalArgumentException("Initial size must be a non-negative integer.");
 		}
 		
-		this.positions = new Position[initialSize];
+		final int nextPrimeSize = Prime.nextLargestPrime(initialSize);	// Enforces the fact that size should be a prime number
+		this.positions = new Position[nextPrimeSize];
 		this.compressor = new Compressor(this);
 		this.emptyMarkerScheme = emptyMarkerScheme;
 		this.numElements = 0;
@@ -209,9 +211,9 @@ public class HashTable
 	
 	
 	/**
-	 * 
-	 * @param key
-	 * @return
+	 * Searches for an entry with the given key, and removes and returns the associated value if one is found. Returns null otherwise.
+	 * @param key The key of the entry to remove.
+	 * @return The value of the removed entry if one is found, null otherwise.
 	 */
 	public String remove(final String key)
 	{
@@ -220,6 +222,8 @@ public class HashTable
 		
 		int index;
 		int elementsSearched = 0;
+		
+		// Iterate through table contents until an empty location is found, all elements are searched, or an entry with a matching key is found
 		do
 		{
 			index = compressor.compress(collisionHandler.nextHash());
@@ -227,40 +231,52 @@ public class HashTable
 		}
 		while (elementsSearched <= numElements && !positionIsEmpty(index) && !positions[index].get().getKey().toString().equals(key));
 		
-		String foundValue = null;
-		if (elementsSearched <= numElements && !positionIsEmpty(index))
+		String foundValue = null;	// If no matching entry is found, return null
+		if (elementsSearched <= numElements && !positionIsEmpty(index))	// Otherwise, return the matching value and delete the entry
 		{
 			foundValue = positions[index].get().getValue().toString();
-			makePositionAvailable(index);
+			makePositionAvailable(index);	// Marks the position as formerly occupied, but now available
 			addElements(-1);
 		}
 		
 		return foundValue;
 	}
 	
+	
+	/**
+	 * Marks the position as available according to the empty marker scheme of the hash table
+	 * @param index
+	 */
 	private void makePositionAvailable(final int index)
 	{
 		switch (emptyMarkerScheme)
 		{
 			case AVAILABLE:
-				positions[index] = new AvailablePosition(index);
+				positions[index] = new AvailablePosition(index);	// If using the AVAILABLE scheme, replace the positon with an AvailablePosition marker
 				break;
 			case NEGATIVE:
-				final KeyValuePair original = positions[index].get();
+				final KeyValuePair original = positions[index].get();	// If using the NEGATIVE scheme, place a '-' character at the head of the entry's key
 				final KeyValuePair negated = new KeyValuePair("-" + original.getKey().toString(), original.getValue().toString());
 				positions[index] = new Position(negated, index);
 				break;
-			case REPLACE:
+			case REPLACE:	// If using the REPLACE scheme, pull back another entry with the same hash to the removed location
 				rollBack(index);
 				break;
-			default:
-				break;
+			default:	// This should not occur; all enum values are accounted for
+				throw new RuntimeException(emptyMarkerScheme + " is an unsupported EmptyMarkerScheme.");
 		}
 	}
 	
+	//
+	//INCOMPLETE
+	//
+	/**
+	 * Replaces the entry at a given index with another entry that would have been hashed there if it was empty.
+	 * @param index The index of the entry to roll back to.
+	 */
 	private void rollBack(final int index)
 	{
-		if (isEmpty())
+		if (isEmpty())	// Should not be called if the table is empty anyway
 		{
 			throw new RuntimeException("Cannot roll back: Hash table is empty.");
 		}
@@ -268,6 +284,8 @@ public class HashTable
 		collisionHandler.reset(positions[index].get().hashCode());
 		positions[index] = null;
 		int nextIndex;
+		
+		// Iterate until a non-empty 
 		do
 		{
 			nextIndex = compressor.compress(collisionHandler.nextHash());
@@ -275,18 +293,29 @@ public class HashTable
 		while (!positionIsEmpty(nextIndex));
 	}
 	
-	public void resize(final int newSize, final CollisionHandlingScheme newCollisionHandlingType, final EmptyMarkerScheme newEmptyMarkerScheme)
+	
+	/**
+	 * Resizes the table to a desired size. The chosen size will be rounded up to the next largest prime number.
+	 * @param newSize The new desired size. Will be rounded up to a prime number.
+	 * @param newCollisionHandlingScheme The table's new collision handling scheme.
+	 * @param newEmptyMarkerScheme The table's new empty marker scheme.
+	 */
+	public void resize(final int newSize, final CollisionHandlingScheme newCollisionHandlingScheme, final EmptyMarkerScheme newEmptyMarkerScheme)
 	{
+		// Cannot make a table smaller than the number of elements it contains
 		if (newSize < numElements)
 		{
 			throw new IllegalArgumentException("New size not large enough to hold all elements.");
 		}
 		
-		numElements = 0;
-		setCollisionHandlingType(newCollisionHandlingType);
+		numElements = 0;	// To allow the collision and empty marker schemes to be changed; will be updated after
+		setCollisionHandlingType(newCollisionHandlingScheme);	// Update the schemes
 		setEmptyMarkerScheme(newEmptyMarkerScheme);
 		
-		HashTable newHashTable = new HashTable(newSize, newCollisionHandlingType, newEmptyMarkerScheme);
+		final int nextPrimeSize = Prime.nextLargestPrime(newSize);	//Size should always be prime, so round up to the next prime
+		HashTable newHashTable = new HashTable(nextPrimeSize, newCollisionHandlingScheme, newEmptyMarkerScheme);	// Make a new hash table with the desired size; properties will be copied over
+		
+		// Put each old entry into the new table; the proper hashing and compression algorithms will be automatically used
 		for (Position p : positions)
 		{
 			if (p != null)
@@ -297,16 +326,26 @@ public class HashTable
 			}
 		}
 		
+		// Copy over relevant properties
 		positions = newHashTable.positions;
 		compressor = newHashTable.compressor;
 		numElements = newHashTable.numElements;
 	}
 	
+	
+	/**
+	 * Resizes the table to a desired size. The chosen size will be rounded up to the next largest prime number.
+	 * @param newSize The new desired size. Will be rounded up to a prime number.
+	 */
 	public void resize(final int newSize)
 	{
 		resize(newSize, collisionHandler.getType(), emptyMarkerScheme);
 	}
 	
+	
+	/**
+	 * Prints the contents of the table to the standard output. Will indicate the key and value of each entry if it exists, and whether the position has been never occupied or formerly occupied.
+	 */
 	public void display()
 	{
 		for (Position p : positions)
@@ -327,6 +366,10 @@ public class HashTable
 		System.out.println();
 	}
 	
+	/**
+	 * Changes the table's collision handling scheme. Can only be called explicitly if the table is empty. Otherwise, use the resize method.
+	 * @param collisionHandlingType The table's new collision handling scheme.
+	 */
 	public void setCollisionHandlingType(final CollisionHandlingScheme collisionHandlingType)
 	{
 		if (!isEmpty())
@@ -352,13 +395,19 @@ public class HashTable
 		return setEmptyMarkerScheme(EmptyMarkerScheme.fromChar(emptyMarkerScheme));
 	}
 	
+	
+	/**
+	 * Changes the table's empty marker scheme.
+	 * @param emptyMarkerScheme The new empty marker scheme of the table.
+	 * @return True if and only if the old scheme and the new scheme are different.
+	 */
 	public boolean setEmptyMarkerScheme(final EmptyMarkerScheme emptyMarkerScheme)
 	{
 		final boolean changedScheme = this.emptyMarkerScheme != emptyMarkerScheme;
 		
 		if (changedScheme)
 		{
-			for (int i = 0; i < positions.length; i++)
+			for (int i = 0; i < positions.length; i++)	// Iterate through the positions in the table, replacing with new empty markers as appropriate
 			{
 				if (positionIsFormerlyOccupied(i))
 				{
@@ -372,7 +421,7 @@ public class HashTable
 							replacementPosition = new Position(new KeyValuePair("-", ""), i);
 							break;
 						case REPLACE:
-							// Do thing
+							rollBack(i);
 							break;
 						default:
 							break;
@@ -385,11 +434,20 @@ public class HashTable
 		return changedScheme;
 	}
 	
+	
+	/**
+	 * Increments the number of elements counter by one
+	 */
 	private void addElement()
 	{
 		addElements(1);
 	}
 	
+	
+	/**
+	 * Increments or decrements the number of elements counter by a specified amount. Updates the load factor afterwards.
+	 * @param change The number to add to the 
+	 */
 	private void addElements(final int change)
 	{
 		numElements += change;
