@@ -77,10 +77,24 @@ public class HashTable
 		}
 	}
 	
+	
+	//------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	//	DEFAULT VALUES
+	//------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	
 	private static final int DEFAULT_INITIAL_SIZE = 100;																// Default initial size of hash table
 	private static final double DEFAULT_REHASH_THRESHOLD = 0.75;														// Default initial size of hash table
+	private static final boolean DEFAULT_EXPAND_BY_FACTOR = true;														// Default to expanding by a factor
+	private static final double DEFAULT_REHASH_FACTOR = 2;																// Default expansion factor
+	private static final int DEFAULT_REHASH_NUMBER = 100;																// Default expansion number
+	
 	private static final CollisionHandlingScheme DEFAULT_COLLISION_HANDLING_SCHEME = CollisionHandlingScheme.DOUBLE;	// Default initial collision handling scheme
 	private static final EmptyMarkerScheme DEFAULT_EMPTY_MARKER_SCHEME = EmptyMarkerScheme.AVAILABLE;					// Default initial empty marker scheme
+	
+	
+	//------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	// INSTANCE VARIABLES
+	//------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	
 	private Position[] positions;					// Holds the positions which point to the key-value pairs
 	private Compressor compressor;					// Maps hash codes to array indices
@@ -89,6 +103,15 @@ public class HashTable
 	private int numElements;						// The number of elements held by the hash table; starts at 0
 	private double loadFactor;						// The ratio of held elements to array size
 	private double rehashThreshold;					// Maximum load factor before rehashing; between 0 and 1 inclusive
+	
+	// Expansion variables
+	private boolean expandByFactor;					// True if expanding table size by a given factor, false if expanding by a given addition  
+	private double rehashFactor;					// The factor to expand by
+	private int rehashNumber;						// The number of addition cells to expand by 
+	
+	//------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	// CONSTRUCTORS
+	//------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	
 	/**
 	 * No-argument constructor. Constructs an empty hash table with with initial size 100, double hashing, and "available" empty markers.
@@ -131,10 +154,23 @@ public class HashTable
 		this.numElements = 0;
 		this.rehashThreshold = initialRehashThreshold;
 		
+		this.expandByFactor = DEFAULT_EXPAND_BY_FACTOR;
+		if (expandByFactor)
+		{
+			setRehashFactor(DEFAULT_REHASH_FACTOR);
+		}
+		else
+		{
+			setRehashFactor(DEFAULT_REHASH_NUMBER);
+		}
+		
 		setCollisionHandlingType(collisionHandlingScheme);
 		updateLoadFactor();		// Compute initial load factor 
 	}
 	
+	//------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	// MAP METHODS
+	//------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	
 	/**
 	 * Adds a new entry to the hash table, with a given string key and string value. If an entry with the same key already exists, the old value is replaced with the new value, and the old value
@@ -352,6 +388,36 @@ public class HashTable
 		updateLoadFactor();
 	}
 	
+	/**
+	 * Sets the factor by which the table will expand when the rehash threshold is met.
+	 * @param rehashFactor The table's new rehash factor. Must be greater than unity.
+	 */
+	public void setRehashFactor(final double rehashFactor)
+	{
+		if (rehashFactor <= 1.0)
+		{
+			throw new IllegalArgumentException("Rehash factor must be greater than unity.");
+		}
+		
+		expandByFactor = true;
+		this.rehashFactor = rehashFactor;
+	}
+	
+	/**
+	 * Sets the number of cells by which the table will expand when the rehash threshold is met.
+	 * @param rehashFactor The table's new rehash factor. Must be greater than unity.
+	 */
+	public void setRehashFactor(final int rehashNumber)
+	{
+		if (rehashNumber <= 1)
+		{
+			throw new IllegalArgumentException("Rehash number must be greater than unity.");
+		}
+		
+		expandByFactor = false;
+		this.rehashNumber = rehashNumber;
+	}
+	
 	
 	/**
 	 * Resizes the table to a desired size. The chosen size will be rounded up to the next largest prime number.
@@ -410,6 +476,12 @@ public class HashTable
 		}
 	}
 	
+	
+	/**
+	 * Changes the table's empty marker scheme.
+	 * @param emptyMarkerScheme The new empty marker scheme of the table. Must be the character 'A', 'N', or 'R'.
+	 * @return True if and only if the old scheme and the new scheme are different.
+	 */
 	public boolean setEmptyMarkerScheme(final char emptyMarkerScheme)
 	{
 		return setEmptyMarkerScheme(EmptyMarkerScheme.fromChar(emptyMarkerScheme));
@@ -479,12 +551,39 @@ public class HashTable
 	 * Re-computes the load factor (ratio of number of elements to total size). Checks that this is not more than the total laod factor afterwards. 
 	 * @return The updated load factor.
 	 */
-	private double updateLoadFactor()
+	private void updateLoadFactor()
 	{
 		loadFactor = ((double) numElements) / size();
-		// TO DO: CHeck load factor after
-		return loadFactor;
-		
+		checkLoadFactor();
+	}
+	
+	/**
+	 * Checks if the load factor is at least the rehash threshold. If so, expands the hash table.
+	 */
+	private void checkLoadFactor()
+	{
+		if (loadFactor >= rehashThreshold)
+		{
+			expandTable();
+		}
+	}
+	
+	
+	/**
+	 * Expands the table by a the rehash factor or number, whichever was last set.
+	 */
+	private void expandTable()
+	{
+		int newSize;
+		if (expandByFactor)
+		{
+			newSize = (int) (size() * rehashFactor);
+		}
+		else
+		{
+			newSize = size() + rehashNumber;
+		}
+		resize(newSize);
 	}
 	
 	
@@ -495,12 +594,6 @@ public class HashTable
 	public boolean isEmpty()
 	{
 		return numElements == 0;
-	}
-	
-	// TO DO: REMOVE AND REPLACE WITH "checkLoadFactor"
-	public boolean isFull()
-	{
-		return numElements >= size();
 	}
 	
 	

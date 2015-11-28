@@ -10,11 +10,13 @@ class KeyValuePair
 {	
 	private Key key;
 	private String value;
+	private int collisions;
 	
 	public KeyValuePair(final String key, final String value)
 	{
 		setKey(key);
 		setValue(value);
+		collisions = 0;
 	}
 	
 	public String getKey()
