@@ -1,4 +1,7 @@
 package prime;
+
+import java.util.Arrays;
+
 public final class Prime
 {
 	private static final int INITIAL_SIZE = 10;
@@ -12,6 +15,8 @@ public final class Prime
 	static
 	{
 		primes = new int[INITIAL_SIZE];
+		// Fill with MAX_VAL to allow binary search to work properly
+		Arrays.fill(primes, Integer.MAX_VALUE);
 		lastIndex = EMPTY_INDEX;
 	}
 	
@@ -91,13 +96,11 @@ public final class Prime
 	}
 	
 	private static void expandPrimeList()
-	{
-		int[] newPrimes = new int[primes.length * EXPANSION_FACTOR];
+	{		
+		int newLength = primes.length * EXPANSION_FACTOR;
+		int[] newPrimes = Arrays.copyOf(primes, newLength);
 		
-		for (int i = 0; i < lastIndex; i++)
-		{
-			newPrimes[i] = primes[i];
-		}
+		Arrays.fill(newPrimes, lastIndex, newLength - 1, Integer.MAX_VALUE);
 		
 		primes = newPrimes;
 	}
@@ -105,21 +108,26 @@ public final class Prime
 	// Improve into binary search; too lazy right now
 	private static int findNextLargestPrime(final int n)
 	{
-		int i = 0;
-		while (primes[i] <= n)
-		{
-			i++;
-		}
-		return primes[i];
+		return findPrime(n, true);
 	}
 	
 	private static int findNextSmallestPrime(final int n)
 	{
-		int i = primes.length - 1;
-		while (primes[i] == 0 || primes[i] >= n)
+		return findPrime(n, false);
+	}
+	
+	private static int findPrime(final int n, boolean largest)
+	{
+		int idx = Arrays.binarySearch(primes, n);
+		if (idx >= 0)
 		{
-			i--;
+			return primes[idx];
 		}
-		return primes[i];
+		else
+		{
+			int sub = largest ? 1 : 2;
+			idx = -idx - sub;
+			return primes[idx];
+		}
 	}
 }
