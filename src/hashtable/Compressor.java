@@ -46,6 +46,6 @@ class Compressor
 	
 	public int compress(final int hashCode)
 	{
-		return ((a * hashCode + b) % p % N);
+		return Math.abs(((a * hashCode + b) % p % N));
 	}
 }
