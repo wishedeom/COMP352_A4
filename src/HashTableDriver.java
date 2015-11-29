@@ -33,6 +33,8 @@ public class HashTableDriver
 			h.put(input2.next());
 		}
 		
-		h.printHashtableStatistics();
+		h.printHashTableStatistics();
+		h.resetHashTableStatistics();
+		h.printHashTableStatistics();
 	}
 }

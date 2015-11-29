@@ -7,7 +7,7 @@ public class Test
 		HashTable h = new HashTable(0);
 		for (int i = 1; i <= 10; i++)
 		{
-			h.printHashtableStatistics();
+			h.printHashTableStatistics();
 			h.display();
 			h.put(String.valueOf(i));
 			System.out.println("Putting " + i);

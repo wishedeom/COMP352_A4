@@ -697,7 +697,7 @@ public class HashTable
 		return maxCollisions;
 	}
 	
-	public void printHashtableStatistics()
+	public void printHashTableStatistics()
 	{
 		System.out.println("--------HASH TABLE STATISTICS--------");
 		System.out.println("Rehash threshold: " + rehashThreshold);
@@ -722,5 +722,16 @@ public class HashTable
 		System.out.println("Maximum collisions for single cell: " + getMaxCollisions());
 		System.out.println("Average collisions over all collided cells: " + getAverageCollisions());
 		System.out.println();
+	}
+	
+	public void resetHashTableStatistics()
+	{
+		for (int i = 0; i < positions.length; i++)
+		{
+			if (!positionIsEmpty(i))
+			{
+				positions[i].get().resetCollisions();
+			}
+		}
 	}
 }

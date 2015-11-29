@@ -54,6 +54,11 @@ class KeyValuePair
 		collisions++;
 	}
 	
+	public void resetCollisions()
+	{
+		collisions = 0;
+	}
+	
 	public int getCollisions()
 	{
 		return collisions;
