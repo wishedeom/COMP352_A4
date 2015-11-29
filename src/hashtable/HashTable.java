@@ -635,6 +635,10 @@ public class HashTable
 		return positions.length;
 	}
 	
+	/**
+	 * Computes the total number of collisions each entry has endured.
+	 * @return The total number of collisions over all entries in the hash table.
+	 */
 	public int getTotalCollisions()
 	{
 		int totalCollisions = 0;
@@ -650,6 +654,10 @@ public class HashTable
 		return totalCollisions;
 	}
 	
+	/**
+	 * Computes the total number of entries that have been collided with.
+	 * @return The total number of entries that have been collided with.
+	 */
 	public int getNumberOfCollidedEntries()
 	{
 		int totalCollided = 0;
@@ -665,6 +673,10 @@ public class HashTable
 		return totalCollided;
 	}
 	
+	/**
+	 * Computes the average number of collisions over all entries that have endured a collision.
+	 * @return The average number of collisions.
+	 */
 	public double getAverageCollisions()
 	{
 		final double numberOfCollidedEntries = getNumberOfCollidedEntries();
@@ -682,6 +694,10 @@ public class HashTable
 		return averageCollisions;
 	}
 	
+	/**
+	 * Computes the greatest number of collisions any entry has endured.
+	 * @return The maximum number of collisions.
+	 */
 	public int getMaxCollisions()
 	{
 		int maxCollisions = 0;
@@ -697,6 +713,11 @@ public class HashTable
 		return maxCollisions;
 	}
 	
+	/**
+	 * Prints a summary of the hash table's statistics.
+	 * Includes the current rehash threshold, expansion factor/number, collision handling scheme, empty marker scheme, table size, number of elements,
+	 * load factor, total number of collisions, maximum number of collisions, and average number of collisions over all entries.
+	 */
 	public void printHashTableStatistics()
 	{
 		System.out.println("--------HASH TABLE STATISTICS--------");
@@ -721,9 +742,13 @@ public class HashTable
 		System.out.println("Total collisions: " + getTotalCollisions());
 		System.out.println("Maximum collisions for single cell: " + getMaxCollisions());
 		System.out.println("Average collisions over all collided cells: " + getAverageCollisions());
+		System.out.println("Total collision rate: " + ((double) getTotalCollisions()) / numElements);
 		System.out.println();
 	}
 	
+	/**
+	 * Resets the tracked number of collisions over all entries in the table.
+	 */
 	public void resetHashTableStatistics()
 	{
 		for (int i = 0; i < positions.length; i++)

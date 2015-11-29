@@ -6,17 +6,24 @@ import java.util.Scanner;
 
 public class HashTableDriver
 {
+	private static final String FILE_1 = "hash_test_file1.txt";
+	private static final String FILE_2 = "hash_test_file2.txt";
+	
 	public static void main(String[] args)
 	{
 		final HashTable h = new HashTable();
-		
+		putFromFiles(h);
+	}
+	
+	public static void putFromFiles(final HashTable h)
+	{
 		Scanner input1 = null;
 		Scanner input2 = null;
 		
 		try
 		{
-			input1 = new Scanner(new FileReader("hash_test_file1.txt"));
-			input2 = new Scanner(new FileReader("hash_test_file2.txt"));
+			input1 = new Scanner(new FileReader(FILE_1));
+			input2 = new Scanner(new FileReader(FILE_2));
 		}
 		catch (FileNotFoundException e)
 		{
@@ -32,9 +39,5 @@ public class HashTableDriver
 		{
 			h.put(input2.next());
 		}
-		
-		h.printHashTableStatistics();
-		h.resetHashTableStatistics();
-		h.printHashTableStatistics();
 	}
 }

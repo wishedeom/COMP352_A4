@@ -78,6 +78,7 @@ class KeyValuePair
 class Key
 {
 	public static final int HASH_BASE = 33;	// Try 33, 37, 39, 41; products of few primes
+	public static final int MAX_HASH_LENGTH = 10;	// Try 33, 37, 39, 41; products of few primes
 	
 	private String key;
 	
@@ -95,7 +96,7 @@ class Key
 	{
 		int code = 0;
 		
-		for (int i = key.length() - 1; i >= 0; i--)
+		for (int i = Math.min(key.length() - 1, MAX_HASH_LENGTH); i >= 0; i--)
 		{
 			code = key.charAt(i) + code * HASH_BASE;	// Horner's rule for evaluating polynomials in O(n) time
 		}
