@@ -189,6 +189,11 @@ public class HashTable
 		do
 		{
 			index = compressor.compress(collisionHandler.nextHash());
+			
+			if (!positionIsEmpty(index))
+			{
+				positions[index].get().incrementCollisions();
+			}
 		}
 		while (!positionIsEmpty(index) && !positions[index].get().getKey().toString().equals(key));
 		
@@ -629,4 +634,93 @@ public class HashTable
 	{
 		return positions.length;
 	}
-}	
+	
+	public int getTotalCollisions()
+	{
+		int totalCollisions = 0;
+		
+		for (int i = 0; i < positions.length; i++)
+		{
+			if (!positionIsEmpty(i))
+			{
+				totalCollisions += positions[i].get().getCollisions();
+			}
+		}
+		
+		return totalCollisions;
+	}
+	
+	public int getNumberOfCollidedEntries()
+	{
+		int totalCollided = 0;
+		
+		for (int i = 0; i < positions.length; i++)
+		{
+			if (!positionIsEmpty(i) && positions[i].get().getCollisions() > 0)
+			{
+				totalCollided++;
+			}
+		}
+		
+		return totalCollided;
+	}
+	
+	public double getAverageCollisions()
+	{
+		final double numberOfCollidedEntries = getNumberOfCollidedEntries();
+		double averageCollisions;
+		
+		if (numberOfCollidedEntries == 0)
+		{
+			averageCollisions = 0;
+		}
+		else
+		{
+			averageCollisions = ((double) getTotalCollisions()) / getNumberOfCollidedEntries();
+		}
+		
+		return averageCollisions;
+	}
+	
+	public int getMaxCollisions()
+	{
+		int maxCollisions = 0;
+		
+		for (int i = 0; i < positions.length; i++)
+		{
+			if (!positionIsEmpty(i) && positions[i].get().getCollisions() > maxCollisions)
+			{
+				maxCollisions = positions[i].get().getCollisions();
+			}
+		}
+		
+		return maxCollisions;
+	}
+	
+	public void printHashtableStatistics()
+	{
+		System.out.println("--------HASH TABLE STATISTICS--------");
+		System.out.println("Rehash threshold: " + rehashThreshold);
+		if (expandByFactor)
+		{
+			System.out.println("Expanding by factor");
+			System.out.println("Rehash factor: " + rehashFactor);
+		}
+		else
+		{
+			System.out.println("Expanding by number of cells");
+			System.out.println("Rehash number: " + rehashNumber);
+		}
+		System.out.println("Collision handling scheme: " + collisionHandler.getType());
+		System.out.println("Empty marker scheme: " + emptyMarkerScheme);
+		System.out.println();
+		System.out.println("Size: " + size());
+		System.out.println("Number of elements: " + numElements);
+		System.out.println("Load factor: " + loadFactor);
+		System.out.println();
+		System.out.println("Total collisions: " + getTotalCollisions());
+		System.out.println("Maximum collisions for single cell: " + getMaxCollisions());
+		System.out.println("Average collisions over all collided cells: " + getAverageCollisions());
+		System.out.println();
+	}
+}

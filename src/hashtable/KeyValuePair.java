@@ -49,6 +49,16 @@ class KeyValuePair
 		this.value = value;
 	}
 	
+	public void incrementCollisions()
+	{
+		collisions++;
+	}
+	
+	public int getCollisions()
+	{
+		return collisions;
+	}
+	
 	public int hashCode()
 	{
 		return key.hashCode();
