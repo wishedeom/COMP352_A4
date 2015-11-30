@@ -510,9 +510,9 @@ public class HashTable
 	 * @param emptyMarkerScheme The new empty marker scheme of the table. Must be the character 'A', 'N', or 'R'.
 	 * @return True if and only if the old scheme and the new scheme are different.
 	 */
-	public boolean setEmptyMarkerScheme(final char emptyMarkerScheme)
+	public void setEmptyMarkerScheme(final char emptyMarkerScheme)
 	{
-		return setEmptyMarkerScheme(EmptyMarkerScheme.fromChar(emptyMarkerScheme));
+		setEmptyMarkerScheme(EmptyMarkerScheme.fromChar(emptyMarkerScheme));
 	}
 	
 	
@@ -521,37 +521,30 @@ public class HashTable
 	 * @param emptyMarkerScheme The new empty marker scheme of the table.
 	 * @return True if and only if the old scheme and the new scheme are different.
 	 */
-	public boolean setEmptyMarkerScheme(final EmptyMarkerScheme emptyMarkerScheme)
-	{
-		final boolean changedScheme = this.emptyMarkerScheme != emptyMarkerScheme;
-		
-		if (changedScheme)
+	public void setEmptyMarkerScheme(final EmptyMarkerScheme emptyMarkerScheme)
+	{		
+		for (int i = 0; i < positions.length; i++)	// Iterate through the positions in the table, replacing with new empty markers as appropriate
 		{
-			for (int i = 0; i < positions.length; i++)	// Iterate through the positions in the table, replacing with new empty markers as appropriate
+			if (positionIsFormerlyOccupied(i))
 			{
-				if (positionIsFormerlyOccupied(i))
+				Position replacementPosition = null;
+				switch (emptyMarkerScheme)
 				{
-					Position replacementPosition = null;
-					switch (emptyMarkerScheme)
-					{
-						case AVAILABLE:
-							replacementPosition = new AvailablePosition(i);
-							break;
-						case NEGATIVE:
-							replacementPosition = new Position(new KeyValuePair("-", ""), i);
-							break;
-						case REPLACE:
-							rollBack(i);
-							break;
-						default:
-							break;
-					}
-					positions[i] = replacementPosition;
+					case AVAILABLE:
+						replacementPosition = new AvailablePosition(i);
+						break;
+					case NEGATIVE:
+						replacementPosition = new Position(new KeyValuePair("-", ""), i);
+						break;
+					case REPLACE:
+						rollBack(i);
+						break;
+					default:
+						break;
 				}
+				positions[i] = replacementPosition;
 			}
 		}
-		
-		return changedScheme;
 	}
 	
 	
