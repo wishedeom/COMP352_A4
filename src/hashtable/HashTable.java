@@ -311,9 +311,6 @@ public class HashTable
 		}
 	}
 	
-	//
-	//INCOMPLETE
-	//
 	/**
 	 * Replaces the entry at a given index with another entry that would have been hashed there if it was empty.
 	 * @param index The index of the entry to roll back to.
@@ -329,12 +326,19 @@ public class HashTable
 		positions[index] = null;
 		int nextIndex;
 		
-		// Iterate until a non-empty 
 		do
 		{
 			nextIndex = compressor.compress(collisionHandler.nextHash());
 		}
 		while (!positionIsEmpty(nextIndex));
+		
+		final int nextNextIndex = compressor.compress(collisionHandler.nextHash());
+		
+		if (!positionIsEmpty(nextNextIndex))
+		{
+			positions[nextIndex] = positions[nextNextIndex];
+			rollBack(nextNextIndex);
+		}
 	}
 	
 	
