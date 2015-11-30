@@ -4,8 +4,46 @@ abstract class CollisionHandler
 {
 	enum CollisionHandlingScheme
 	{
-		DOUBLE,
-		QUADRATIC;
+		DOUBLE		('D'),
+		QUADRATIC	('Q');
+		
+		private char representation;	// Character representation of the enum value
+		
+		
+		/**
+		 * Constructor. Associates each value with a character representation.
+		 * @param representation The character representation of the enum value.
+		 */
+		private CollisionHandlingScheme(final char representation)
+		{
+			this.representation = representation;
+		}
+		
+		
+		/**
+		 * Converts from a character representation to an empty marker scheme.
+		 * @param representation The character representation of the empty marker scheme. Must be 'A', 'N', or 'R'.
+		 * @return The empty marker scheme enumerated value.
+		 */
+		static CollisionHandlingScheme fromChar(final char representation)
+		{
+			CollisionHandlingScheme emptyMarkerScheme = null;
+			
+			for (CollisionHandlingScheme e : CollisionHandlingScheme.values())	// Iterate through the enum values until a matching one is found.
+			{
+				if (representation == e.representation)
+				{
+					emptyMarkerScheme = e;
+				}
+			}
+			
+			if (emptyMarkerScheme == null)	// Throw an exception if an unsupported character is passed.
+			{
+				throw new IllegalArgumentException("This character does not have an associated empty marker scheme.");
+			}
+			
+			return emptyMarkerScheme;
+		}
 	}
 	
 	private int rawHash;	// Unmodified hash code

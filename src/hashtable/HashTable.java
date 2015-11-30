@@ -164,7 +164,7 @@ public class HashTable
 			setRehashFactor(DEFAULT_REHASH_NUMBER);
 		}
 		
-		setCollisionHandlingType(collisionHandlingScheme);
+		setCollisionHandlingScheme(collisionHandlingScheme);
 		updateLoadFactor();		// Compute initial load factor 
 	}
 	
@@ -353,7 +353,7 @@ public class HashTable
 		}
 		
 		numElements = 0;	// To allow the collision and empty marker schemes to be changed; will be updated after
-		setCollisionHandlingType(newCollisionHandlingScheme);	// Update the schemes
+		setCollisionHandlingScheme(newCollisionHandlingScheme);	// Update the schemes
 		setEmptyMarkerScheme(newEmptyMarkerScheme);
 		
 		final int nextPrimeSize = Prime.nextLargestPrime(newSize);	//Size should always be prime, so round up to the next prime
@@ -433,6 +433,20 @@ public class HashTable
 		resize(newSize, collisionHandler.getType(), emptyMarkerScheme);
 	}
 	
+	public void resize(final int newSize, final char collisionHandlingScheme, final char emptyMarkerScheme)
+	{
+		resize(newSize, CollisionHandlingScheme.fromChar(collisionHandlingScheme), EmptyMarkerScheme.fromChar(emptyMarkerScheme));
+	}
+	
+	public CollisionHandlingScheme getCollisionHandlingScheme()
+	{
+		return collisionHandler.getType();
+	}
+	
+	public EmptyMarkerScheme getEmptyMarkerScheme()
+	{
+		return emptyMarkerScheme;
+	}
 	
 	/**
 	 * Prints the contents of the table to the standard output. Will indicate the key and value of each entry if it exists, and whether the position has been never occupied or formerly occupied.
@@ -461,7 +475,7 @@ public class HashTable
 	 * Changes the table's collision handling scheme. Can only be called explicitly if the table is empty. Otherwise, use the resize method.
 	 * @param collisionHandlingType The table's new collision handling scheme.
 	 */
-	public void setCollisionHandlingType(final CollisionHandlingScheme collisionHandlingType)
+	public void setCollisionHandlingScheme(final CollisionHandlingScheme collisionHandlingType)
 	{
 		if (!isEmpty())
 		{
@@ -479,6 +493,11 @@ public class HashTable
 			default:
 				break;
 		}
+	}
+	
+	public void setCollisionHandlingScheme(final char collisionHandlingScheme)
+	{
+		setCollisionHandlingScheme(CollisionHandlingScheme.fromChar(collisionHandlingScheme));
 	}
 	
 	
