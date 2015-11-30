@@ -56,7 +56,7 @@ public class HashTable
 		 * @param representation The character representation of the empty marker scheme. Must be 'A', 'N', or 'R'.
 		 * @return The empty marker scheme enumerated value.
 		 */
-		private static EmptyMarkerScheme fromChar(final char representation)
+		static EmptyMarkerScheme fromChar(final char representation)
 		{
 			EmptyMarkerScheme emptyMarkerScheme = null;
 			
