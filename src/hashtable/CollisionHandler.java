@@ -27,22 +27,23 @@ abstract class CollisionHandler
 		 */
 		static CollisionHandlingScheme fromChar(final char representation)
 		{
-			CollisionHandlingScheme emptyMarkerScheme = null;
+			CollisionHandlingScheme collisionHandlingScheme = null;
 			
 			for (CollisionHandlingScheme e : CollisionHandlingScheme.values())	// Iterate through the enum values until a matching one is found.
 			{
 				if (representation == e.representation)
 				{
-					emptyMarkerScheme = e;
+					collisionHandlingScheme = e;
+					break;
 				}
 			}
 			
-			if (emptyMarkerScheme == null)	// Throw an exception if an unsupported character is passed.
+			if (collisionHandlingScheme == null)	// Throw an exception if an unsupported character is passed.
 			{
 				throw new IllegalArgumentException("This character does not have an associated empty marker scheme.");
 			}
 			
-			return emptyMarkerScheme;
+			return collisionHandlingScheme;
 		}
 	}
 	

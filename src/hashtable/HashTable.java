@@ -65,6 +65,7 @@ public class HashTable
 				if (representation == e.representation)
 				{
 					emptyMarkerScheme = e;
+					break;
 				}
 			}
 			
@@ -522,7 +523,9 @@ public class HashTable
 	 * @return True if and only if the old scheme and the new scheme are different.
 	 */
 	public void setEmptyMarkerScheme(final EmptyMarkerScheme emptyMarkerScheme)
-	{		
+	{
+		this.emptyMarkerScheme = emptyMarkerScheme;
+		
 		for (int i = 0; i < positions.length; i++)	// Iterate through the positions in the table, replacing with new empty markers as appropriate
 		{
 			if (positionIsFormerlyOccupied(i))
