@@ -1,6 +1,6 @@
 package hashtable;
 
-abstract class CollisionHandler
+public abstract class CollisionHandler
 {
 	enum CollisionHandlingScheme
 	{
